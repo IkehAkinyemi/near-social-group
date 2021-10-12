@@ -75,3 +75,5 @@ export function asNEAR(amount: u128): string {
 export function toYocto(amount: number): u128 {
   return u128.mul(ONE_NEAR, u128.from(amount))
 }
+
+

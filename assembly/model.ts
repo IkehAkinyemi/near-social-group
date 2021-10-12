@@ -1,5 +1,5 @@
 import { context } from "near-sdk-as";
-import { PersistentVector } from "near-sdk-core";
+import { PersistentVector, RNG } from "near-sdk-core";
 
 /**
  * membership status of each of the member in the community
@@ -23,9 +23,7 @@ type Discuss = {
   ownerID: string;
 };
 
-/**
- * Represents the member's object/interface
- */
+
 @nearBindgen
 class Member {
   id: i32;
@@ -47,16 +45,19 @@ type Voter = {
   id: string;
 };
 
+export enum IssueType {
+  COMPLAINT,
+  ELECTION,
+}
+
 @nearBindgen
 class Issue {
-  title: string;
   description: string;
   Upvote: i64;
   downVote: i64;
   voters: Voter[];
 
-  constructor(title: string, description: string) {
-    this.title = title;
+  constructor(public type: IssueType, description: string) {
     this.description = description;
     this.Upvote = 0;
     this.downVote = 0;
@@ -65,7 +66,7 @@ class Issue {
 }
 
 @nearBindgen
-class CommunityStruct {
+export class CommunityStruct {
   id: u64;
   name: string;
   description: string;
@@ -74,19 +75,13 @@ class CommunityStruct {
   discussion: PersistentVector<Discuss>;
   issues: PersistentVector<Issue>;
 
-  constructor(
-    id: u64,
-    name: string,
-    description: string,
-    teamLeader: string,
-    members: PersistentVector<Member>,
-    discussion: PersistentVector<Discuss>,
-    issues: PersistentVector<Issue>
-  ) {
-    this.id = id;
+  constructor(name: string, description: string) {
+    let uuid = new RNG<u64>(1, u64.MAX_VALUE);
+
+    this.id = uuid.next();
     this.name = name;
     this.description = description;
-    this.teamLeader = teamLeader;
+    this.teamLeader = context.sender;
     this.members = new PersistentVector<Member>("member");
     this.discussion = new PersistentVector<Discuss>("discuss");
     this.issues = new PersistentVector<Issue>("issues");
@@ -135,13 +130,11 @@ class CommunityStruct {
     }
   }
 
-  addIssues(title: string, description: string): string {
+  switchTeamLeader(newLeader: string): void {
     assert(
-      context.sender == this.teamLeader,
-      "Only the team leader is eligible to call this function"
+      this.teamLeader == context.sender,
+      "The current team leader would handle over the leadership"
     );
-
-    this.issues.push(new Issue(title, description));
-    return "Update the community issues' board";
+    this.teamLeader = newLeader;
   }
 }
