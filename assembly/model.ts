@@ -6,8 +6,8 @@ import { PersistentVector, RNG } from "near-sdk-core";
  */
 export enum Levels {
   beginner,
-  intermediate,
-  senior,
+  intermediate = 50,
+  senior = 100,
 }
 
 export enum Section {
@@ -32,9 +32,9 @@ class Member {
   level: Levels;
   gender: string;
 
-  constructor(name: string, level: Levels, age: i32, gender: string, id: i32) {
+  constructor(name: string, age: i32, gender: string, id: i32) {
     this.name = name;
-    this.level = level;
+    this.level = Levels.beginner;
     this.age = age;
     this.gender = gender;
     this.id = id;
