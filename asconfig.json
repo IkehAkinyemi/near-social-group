@@ -1,0 +1,8 @@
+{
+  "workspaces": ["./"],
+  "options": {
+    "measure": true,
+    "binaryFile": "./out/main.wasm"
+  },
+  "extends": "near-sdk-as/asconfig.json"
+}
