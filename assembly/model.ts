@@ -71,7 +71,7 @@ export class CommunityStruct {
   name: string;
   description: string;
   teamLeader: string;
-  members: PersistentVector<Member>;
+  members: PersistentVector<Member | null>;
   discussion: PersistentVector<Discuss>;
   issues: PersistentVector<Issue>;
 
@@ -79,7 +79,7 @@ export class CommunityStruct {
     this.name = name;
     this.description = description;
     this.teamLeader = context.sender;
-    this.members = new PersistentVector<Member>("member");
+    this.members = new PersistentVector<Member | null>("member");
     this.discussion = new PersistentVector<Discuss>("discuss");
     this.issues = new PersistentVector<Issue>("issues");
   }
@@ -98,7 +98,7 @@ export class CommunityStruct {
 
     for (let x = 0; x > this.members.length; x++) {
       assert(
-        this.members[x].id != id,
+        this.members[x]?.id != id,
         "This unique ID exists in the community"
       );
     }
@@ -136,4 +136,6 @@ export class CommunityStruct {
   }
 }
 
-export const communities = new PersistentMap<string, CommunityStruct>("community");
+export const communities = new PersistentMap<string, CommunityStruct>(
+  "community"
+);
