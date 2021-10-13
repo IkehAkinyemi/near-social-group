@@ -36,18 +36,16 @@ type Voter = {
 
 @nearBindgen
 class Member {
-  id: i32;
   name: AccountId;
   age: i32;
   level: Levels;
   gender: string;
 
-  constructor(name: AccountId, age: i32, gender: string, id: i32) {
+  constructor(name: AccountId, age: i32, gender: string, public id: string) {
     this.name = name;
     this.level = Levels.beginner;
     this.age = age;
     this.gender = gender;
-    this.id = id;
   }
 }
 
@@ -71,7 +69,7 @@ export class CommunityStruct {
   name: string;
   description: string;
   teamLeader: string;
-  members: PersistentVector<Member | null>;
+  members: PersistentVector<Member>;
   discussion: PersistentVector<Discuss>;
   issues: PersistentVector<Issue>;
 
@@ -79,7 +77,7 @@ export class CommunityStruct {
     this.name = name;
     this.description = description;
     this.teamLeader = context.sender;
-    this.members = new PersistentVector<Member | null>("member");
+    this.members = new PersistentVector<Member>("member");
     this.discussion = new PersistentVector<Discuss>("discuss");
     this.issues = new PersistentVector<Issue>("issues");
   }
@@ -89,16 +87,18 @@ export class CommunityStruct {
     level: Levels,
     age: i32,
     gender: string,
-    id: i32
   ): string {
+    const roll = new RNG<u32>(1, u32.MAX_VALUE);
+    const id = "Com-" + roll.next().toString();
+
     assert(
       context.sender == this.teamLeader,
       "Only the team leader is eligible to call this function"
     );
 
-    for (let x = 0; x > this.members.length; x++) {
+    for (let x = 0; x < this.members.length; x++) {
       assert(
-        this.members[x]?.id != id,
+        this.members[x].id != id,
         "This unique ID exists in the community"
       );
     }
@@ -114,13 +114,13 @@ export class CommunityStruct {
     return "Added a new member to the community";
   }
 
-  removeMember(id: i32): void {
+  removeMember(id: string): void {
     assert(
       context.sender == this.teamLeader,
       "Only the team leader is eligible to call this function"
     );
 
-    for (let x = 0; x > this.members.length; x++) {
+    for (let x = 0; x < this.members.length; x++) {
       if (this.members[x].id == id) {
         this.members.swap_remove(x);
       }
@@ -136,6 +136,4 @@ export class CommunityStruct {
   }
 }
 
-export const communities = new PersistentMap<string, CommunityStruct>(
-  "community"
-);
+export const communities = new PersistentMap<string, CommunityStruct>("community");
