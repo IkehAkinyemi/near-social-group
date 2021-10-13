@@ -1,5 +1,5 @@
 import { context } from "near-sdk-as";
-import { PersistentVector, RNG } from "near-sdk-core";
+import { PersistentMap, PersistentVector, RNG } from "near-sdk-core";
 
 /**
  * membership status of each of the member in the community
@@ -16,6 +16,11 @@ export enum Section {
   WEB,
 }
 
+export enum IssueType {
+  COMPLAINT,
+  ELECTION,
+}
+
 type Discuss = {
   id: u32;
   section: Section;
@@ -23,31 +28,27 @@ type Discuss = {
   ownerID: string;
 };
 
+type AccountId = string;
+
+type Voter = {
+  id: string;
+};
 
 @nearBindgen
 class Member {
   id: i32;
-  name: string;
+  name: AccountId;
   age: i32;
   level: Levels;
   gender: string;
 
-  constructor(name: string, age: i32, gender: string, id: i32) {
+  constructor(name: AccountId, age: i32, gender: string, id: i32) {
     this.name = name;
     this.level = Levels.beginner;
     this.age = age;
     this.gender = gender;
     this.id = id;
   }
-}
-
-type Voter = {
-  id: string;
-};
-
-export enum IssueType {
-  COMPLAINT,
-  ELECTION,
 }
 
 @nearBindgen
@@ -67,7 +68,6 @@ class Issue {
 
 @nearBindgen
 export class CommunityStruct {
-  id: u64;
   name: string;
   description: string;
   teamLeader: string;
@@ -75,10 +75,7 @@ export class CommunityStruct {
   discussion: PersistentVector<Discuss>;
   issues: PersistentVector<Issue>;
 
-  constructor(name: string, description: string) {
-    let uuid = new RNG<u64>(1, u64.MAX_VALUE);
-
-    this.id = uuid.next();
+  constructor(public id: string, name: string, description: string) {
     this.name = name;
     this.description = description;
     this.teamLeader = context.sender;
@@ -138,3 +135,5 @@ export class CommunityStruct {
     this.teamLeader = newLeader;
   }
 }
+
+export const communities = new PersistentMap<string, CommunityStruct>("community");
