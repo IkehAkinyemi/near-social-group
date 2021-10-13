@@ -1,5 +1,5 @@
 import { context } from "near-sdk-as";
-import { CommunityStruct, IssueType, communities, Levels } from "./model";
+import { CommunityStruct, IssueType, communities, Levels, Issue } from "./model";
 import { u128, RNG } from "near-sdk-as";
 
 export function createCommunity(name: string, description: string): string {
@@ -17,7 +17,7 @@ export function levelUp(communityID: string, memberID: string): void {
     u128.from(50),
     u128.from("1000000000000000000000000")
   );
-  
+
   const HUNDREDTH_NEAR = u128.mul(
     u128.from(100),
     u128.from("1000000000000000000000000")
@@ -36,11 +36,17 @@ export function levelUp(communityID: string, memberID: string): void {
           "Thank you sir for gifting us money. You can't be increased any further"
         );
 
-        if(DEPOSIT >= FIFTY_NEAR && community.members[x].level == Levels.beginner) {
+        if (
+          DEPOSIT >= FIFTY_NEAR &&
+          community.members[x].level == Levels.beginner
+        ) {
           community.members[x].level = Levels.intermediate;
         }
-        
-        if(DEPOSIT >= HUNDREDTH_NEAR && community.members[x].level == Levels.intermediate) {
+
+        if (
+          DEPOSIT >= HUNDREDTH_NEAR &&
+          community.members[x].level == Levels.intermediate
+        ) {
           community.members[x].level = Levels.senior;
         }
 
@@ -50,4 +56,11 @@ export function levelUp(communityID: string, memberID: string): void {
   }
 }
 
-export function createIssue(issueType: IssueType, description: string): void {}
+export function createIssue(communityID: string, issueType: IssueType, description: string): void {
+  const community = communities.get(communityID);
+  assert(community != null, "This communnity doesn't exist yet. Do you mind creating it!");
+
+  if (community != null && community.teamLeader == context.sender) {
+    community.issues.push(new Issue());
+  }
+}

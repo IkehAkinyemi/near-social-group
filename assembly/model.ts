@@ -50,7 +50,7 @@ class Member {
 }
 
 @nearBindgen
-class Issue {
+export class Issue {
   description: string;
   Upvote: i64;
   downVote: i64;
