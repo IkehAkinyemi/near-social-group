@@ -1,5 +1,12 @@
 import { context } from "near-sdk-as";
-import { CommunityStruct, IssueType, communities, Levels, Issue } from "./model";
+import {
+  CommunityStruct,
+  IssueType,
+  communities,
+  Levels,
+  Issue,
+  AccountId,
+} from "./model";
 import { u128, RNG } from "near-sdk-as";
 
 export function createCommunity(name: string, description: string): string {
@@ -11,7 +18,7 @@ export function createCommunity(name: string, description: string): string {
   return "Created a new community with the name: " + name;
 }
 
-export function levelUp(communityID: string, memberID: string): void {
+export function levelUp(communityID: string, memberID: AccountId): void {
   const DEPOSIT = context.attachedDeposit;
   const FIFTY_NEAR = u128.mul(
     u128.from(50),
@@ -56,11 +63,29 @@ export function levelUp(communityID: string, memberID: string): void {
   }
 }
 
-export function createIssue(communityID: string, issueType: IssueType, description: string): void {
+export function createIssue(
+  communityID: string,
+  issueType: IssueType,
+  description: string
+): void {
   const community = communities.get(communityID);
-  assert(community != null, "This communnity doesn't exist yet. Do you mind creating it!");
+  assert(
+    community != null,
+    "This communnity doesn't exist yet. Do you mind creating it!"
+  );
 
   if (community != null && community.teamLeader == context.sender) {
-    community.issues.push(new Issue());
+    let uuid = new RNG<u64>(1, u64.MAX_VALUE);
+    const id = "COM-" + uuid.next().toString();
+
+    community.issues.push(new Issue(id, issueType, description));
   }
+}
+
+export function VoteIssue(memberID: AccountId, id: string) {
+  
+}
+
+function discussion(communityID: string): void {
+  const community = communities.get(communityID);
 }

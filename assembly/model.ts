@@ -28,7 +28,7 @@ type Discuss = {
   ownerID: string;
 };
 
-type AccountId = string;
+export type AccountId = string;
 
 type Voter = {
   id: string;
@@ -56,7 +56,7 @@ export class Issue {
   downVote: i64;
   voters: Voter[];
 
-  constructor(public type: IssueType, description: string) {
+  constructor(public id: string, public type: IssueType, description: string) {
     this.description = description;
     this.Upvote = 0;
     this.downVote = 0;
